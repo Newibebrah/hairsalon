@@ -92,6 +92,26 @@ export function Navbar() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        // Check if click is on the hamburger button itself
+        const hamburgerBtn = document.querySelector('[aria-controls="mobile-menu"]');
+        if (hamburgerBtn && hamburgerBtn.contains(e.target as Node)) {
+          return; // Don't close if clicking on hamburger
+        }
+        setIsOpen(false);
+      }
+    };
+
+    // Use capture phase to catch clicks before they reach the menu
+    document.addEventListener('mousedown', handleClickOutside, true);
+    return () => document.removeEventListener('mousedown', handleClickOutside, true);
+  }, [isOpen]);
+
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
 
@@ -115,7 +135,12 @@ export function Navbar() {
       aria-label="Navigasi mobile"
       tabIndex={-1}
     >
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-[-1]" aria-hidden="true" onClick={closeMenu} />
+      {/* Clean backdrop - lighter and less intrusive */}
+      <div 
+        className="absolute inset-0 bg-white/80 backdrop-blur-sm z-[-1]" 
+        aria-hidden="true" 
+        onClick={closeMenu}
+      />
       <div className="flex-1 flex flex-col justify-start pt-16 pb-8 px-6">
         <ul className="flex flex-col items-center gap-2 w-full" role="menu">
           {navLinks.map((link, index) => (
@@ -135,7 +160,6 @@ export function Navbar() {
                   if (link.scroll) {
                     e.preventDefault();
                     handleLinkClick(link.href);
-                    // Delay close to allow scroll to start
                     setTimeout(closeMenu, 100);
                   }
                 }}
@@ -173,6 +197,7 @@ export function Navbar() {
       </div>
     </div>
   );
+
 
   return (
     <header
@@ -242,8 +267,8 @@ export function Navbar() {
             <div className="flex items-center gap-2 md:hidden">
               <button
                 type="button"
-                className="p-2 text-heading hover:text-brand transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                aria-label="Menu"
+                className="p-2 text-heading hover:text-brand transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-pink-50"
+                aria-label={isOpen ? 'Tutup menu' : 'Buka menu'}
                 onClick={toggleMenu}
                 aria-expanded={isOpen}
                 aria-controls="mobile-menu"
