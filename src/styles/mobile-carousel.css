@@ -1,8 +1,8 @@
 /* Mobile Gallery - Native Scroll Snap */
 @layer components {
   .gallery {
-    --slide-ratio: 4 / 5;
-    --slide-gap: 0;
+    --slide-ratio: 3 / 4;
+    --slide-gap: 12px;
     --scrollbar-w: 0;
 
     position: relative;
@@ -12,7 +12,7 @@
     scroll-snap-type: x mandatory;
     scroll-snap-stop: always;
     scroll-behavior: smooth;
-    scroll-padding: 0;
+    scroll-padding: 0 16px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -20,6 +20,7 @@
     overscroll-behavior-x: contain;
     overscroll-behavior-y: none;
     box-sizing: border-box;
+    padding: 0 16px;
   }
 
   .gallery::-webkit-scrollbar {
@@ -37,13 +38,14 @@
   }
 
   .gallery__slide {
-    flex: 0 0 100%;
-    width: 100%;
+    flex: 0 0 calc(100% - 32px);
+    width: calc(100% - 32px);
     scroll-snap-align: center;
     scroll-snap-stop: always;
     aspect-ratio: var(--slide-ratio);
-    max-height: 60svh;
+    max-height: 50svh;
     min-width: 0;
+    margin: 0 16px;
   }
 
   .gallery__slide > * {
