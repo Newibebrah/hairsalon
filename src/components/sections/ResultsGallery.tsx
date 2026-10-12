@@ -129,6 +129,7 @@ export function ResultsGallery() {
           id="gallery-carousel"
           ariaLabel="Galeri hasil kerja salon"
           count={galleryImages.length}
+          autoSlideInterval={4000}
         >
           {slides}
         </MobileCarousel>

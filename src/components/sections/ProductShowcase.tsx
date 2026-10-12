@@ -66,6 +66,7 @@ export function ProductShowcase() {
               id="products-carousel"
               ariaLabel="Produk unggulan salon"
               count={products.length}
+              autoSlideInterval={4000}
             >
               {slides}
             </MobileCarousel>
