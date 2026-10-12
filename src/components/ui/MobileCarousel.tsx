@@ -78,16 +78,12 @@ export function MobileCarousel({
     const clamped = Math.max(0, Math.min(count - 1, index));
     const slide = track.children[clamped] as HTMLElement;
     if (slide) {
-      // Use track.scrollTo to avoid page scroll - only scrolls the track element
       track.scrollTo({
         left: slide.offsetLeft,
         behavior: 'smooth'
       });
     }
   }, [count]);
-
-  const goToPrev = useCallback(() => scrollToSlide(currentIndex - 1), [currentIndex, scrollToSlide]);
-  const goToNext = useCallback(() => scrollToSlide(currentIndex + 1), [currentIndex, scrollToSlide]);
 
   // Auto-slide logic
   useEffect(() => {
@@ -108,9 +104,6 @@ export function MobileCarousel({
   // Pause auto-slide on user interaction
   const handleInteractionStart = () => { isUserInteractingRef.current = true; };
   const handleInteractionEnd = () => { isUserInteractingRef.current = false; };
-
-  const canGoPrev = currentIndex > 0;
-  const canGoNext = currentIndex < count - 1;
 
   return (
     <div
@@ -149,23 +142,20 @@ export function MobileCarousel({
 
       {/* Dot Indicators */}
       <div className="mobile-carousel__dots" role="tablist" aria-label="Indikator slide">
-        {Array.from({ length: count - 1 }, (_, i) => {
-          const dotIndex = i + 1; // Skip first dot (index 0)
-          return (
-            <button
-              key={dotIndex}
-              type="button"
-              role="tab"
-              className="mobile-carousel__dot"
-              onClick={() => scrollToSlide(dotIndex)}
-              onPointerDown={handleInteractionStart}
-              onPointerUp={handleInteractionEnd}
-              aria-label={`Ke slide ${dotIndex + 1}`}
-              aria-selected={dotIndex === currentIndex}
-              aria-controls={`${id}-slide-${dotIndex}`}
-            />
-          );
-        })}
+        {Array.from({ length: count }, (_, i) => (
+          <button
+            key={i}
+            type="button"
+            role="tab"
+            className="mobile-carousel__dot"
+            onClick={() => scrollToSlide(i)}
+            onPointerDown={handleInteractionStart}
+            onPointerUp={handleInteractionEnd}
+            aria-label={`Ke slide ${i + 1}`}
+            aria-selected={i === currentIndex}
+            aria-controls={`${id}-slide-${i}`}
+          />
+        ))}
       </div>
     </div>
   );
