@@ -4,22 +4,18 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { galleryImages } from '@/data/gallery';
-import { useMobileCarousel } from '@/hooks/useMobileCarousel';
+import { MobileCarousel } from '@/components/ui/MobileCarousel';
+import '@/styles/mobile-carousel.css';
 
 export function ResultsGallery() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const lightboxRef = useRef<HTMLDivElement>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
   const focusableElementsRef = useRef<HTMLElement[]>([]);
-
-  const carousel = useMobileCarousel({
-    itemCount: galleryImages.length,
-    breakpoint: 768,
-    loop: false, // No infinite loop - stop at bounds
-    autoPlay: false,
-  });
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const openLightbox = useCallback((index: number) => {
+    setLightboxIndex(index);
     setIsLightboxOpen(true);
     lastFocusedRef.current = document.activeElement as HTMLElement;
     document.body.style.overflow = 'hidden';
@@ -33,22 +29,15 @@ export function ResultsGallery() {
 
   const goToPrev = useCallback(() => {
     if (isLightboxOpen) {
-      // Lightbox navigation
-      setCurrentLightboxIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1));
-    } else {
-      carousel.goToPrev();
+      setLightboxIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1));
     }
-  }, [isLightboxOpen, carousel]);
+  }, [isLightboxOpen]);
 
   const goToNext = useCallback(() => {
     if (isLightboxOpen) {
-      setCurrentLightboxIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1));
-    } else {
-      carousel.goToNext();
+      setLightboxIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1));
     }
-  }, [isLightboxOpen, carousel]);
-
-  const [lightboxIndex, setCurrentLightboxIndex] = useState(0);
+  }, [isLightboxOpen]);
 
   // Focus trap for lightbox
   useEffect(() => {
@@ -92,6 +81,29 @@ export function ResultsGallery() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isLightboxOpen, closeLightbox, goToPrev, goToNext]);
 
+  // Build slide components for carousel
+  const slides = galleryImages.map((image, index) => (
+    <button
+      key={image.id}
+      type="button"
+      className="w-full h-full aspect-[4/3] rounded-2xl overflow-hidden bg-pink-50 focus-visible:ring-4 focus-visible:ring-brand focus-visible:ring-offset-2"
+      onClick={() => openLightbox(index)}
+      aria-label={`Lihat ${image.category} - ${image.alt}`}
+    >
+      <img
+        src={image.src}
+        alt=""
+        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+        loading={index < 2 ? 'eager' : 'lazy'}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-heading/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
+      <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 hover:opacity-100 transition-all duration-300 translate-y-2 hover:translate-y-0">
+        <p className="font-heading text-lg font-medium">{image.category}</p>
+      </div>
+    </button>
+  ));
+
   return (
     <section
       id="gallery"
@@ -113,129 +125,43 @@ export function ResultsGallery() {
         />
 
         {/* Mobile Carousel */}
-        {carousel.isMobile && (
-          <div
-            ref={carousel.containerRef}
-            className="relative mt-10 overflow-hidden px-2"
-            role="region"
-            aria-label="Galeri hasil kerja - geser untuk melihat lebih banyak"
-            onTouchStart={carousel.onTouchStart}
-            onTouchMove={carousel.onTouchMove}
-            onTouchEnd={carousel.onTouchEnd}
-          >
-            <div
-              className="flex transition-transform duration-500 ease-out touch-pan-x snap-x snap-mandatory"
-              style={{
-                transform: `translateX(${carousel.translateX}%)`,
-                width: `${galleryImages.length * 100}%`,
-              }}
-              role="list"
-            >
-              {galleryImages.map((image, index) => (
-                <article
-                  key={image.id}
-                  className="w-full shrink-0 snap-center px-2"
-                  style={{ flexBasis: `${100 / galleryImages.length}%` }}
-                  role="listitem"
-                >
-                  <button
-                    type="button"
-                    className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-pink-50 focus-visible:ring-4 focus-visible:ring-brand focus-visible:ring-offset-2"
-                    onClick={() => openLightbox(index)}
-                    aria-label={`Lihat ${image.category} - ${image.alt}`}
-                  >
-                    <img
-                      src={image.src}
-                      alt=""
-                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                      loading={index < 2 ? 'eager' : 'lazy'}
-                      aria-hidden="true"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-heading/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
-                    <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 hover:opacity-100 transition-all duration-300 translate-y-2 hover:translate-y-0">
-                      <p className="font-heading text-lg font-medium">{image.category}</p>
-                    </div>
-                  </button>
-                </article>
-              ))}
-            </div>
-
-            {/* Navigation Arrows - Mobile Only */}
-            <button
-              type="button"
-              className={`absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 z-10 focus-visible:ring-2 focus-visible:ring-brand ${
-                carousel.canGoPrev ? '' : 'opacity-30 pointer-events-none'
-              }`}
-              onClick={carousel.goToPrev}
-              aria-label="Gambar sebelumnya"
-              disabled={!carousel.canGoPrev}
-            >
-              <ChevronLeft className="w-5 h-5 text-heading" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 z-10 focus-visible:ring-2 focus-visible:ring-brand ${
-                carousel.canGoNext ? '' : 'opacity-30 pointer-events-none'
-              }`}
-              onClick={carousel.goToNext}
-              aria-label="Gambar selanjutnya"
-              disabled={!carousel.canGoNext}
-            >
-              <ChevronRight className="w-5 h-5 text-heading" aria-hidden="true" />
-            </button>
-
-            {/* Indicator Dots */}
-            <div className="flex justify-center gap-2 mt-4" role="tablist" aria-label="Indikator gambar">
-              {galleryImages.map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  role="tab"
-                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${
-                    index === carousel.currentIndex 
-                      ? 'bg-brand w-8' 
-                      : 'bg-pink-400 hover:bg-brand opacity-60'
-                  }`}
-                  onClick={() => carousel.setCurrentIndex(index)}
-                  aria-label={`Ke gambar ${index + 1}`}
-                  aria-selected={index === carousel.currentIndex}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        <MobileCarousel
+          id="gallery-carousel"
+          ariaLabel="Galeri hasil kerja salon"
+          count={galleryImages.length}
+        >
+          {slides}
+        </MobileCarousel>
 
         {/* Desktop Grid */}
-        {!carousel.isMobile && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mt-12" role="list">
-            {galleryImages.map((image, index) => (
-              <article
-                key={image.id}
-                className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-pink-50"
-                role="listitem"
+        <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mt-12" role="list">
+          {galleryImages.map((image, index) => (
+            <article
+              key={image.id}
+              className="group relative aspect-[4/3] rounded-2xl overflow-hidden bg-pink-50"
+              role="listitem"
+            >
+              <button
+                type="button"
+                className="w-full h-full focus-visible:ring-4 focus-visible:ring-brand focus-visible:ring-offset-2"
+                onClick={() => openLightbox(index)}
+                aria-label={`Lihat ${image.category} - ${image.alt}`}
               >
-                <button
-                  type="button"
-                  className="w-full h-full focus-visible:ring-4 focus-visible:ring-brand focus-visible:ring-offset-2"
-                  onClick={() => openLightbox(index)}
-                  aria-label={`Lihat ${image.category} - ${image.alt}`}
-                >
-                  <img
-                    src={image.src}
-                    alt=""
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading={index < 2 ? 'eager' : 'lazy'}
-                    aria-hidden="true"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-heading/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
-                  <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                    <p className="font-heading text-lg font-medium">{image.category}</p>
-                  </div>
-                </button>
-              </article>
-            ))}
-          </div>
-        )}
+                <img
+                  src={image.src}
+                  alt=""
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  loading={index < 2 ? 'eager' : 'lazy'}
+                  aria-hidden="true"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-heading/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
+                <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                  <p className="font-heading text-lg font-medium">{image.category}</p>
+                </div>
+              </button>
+            </article>
+          ))}
+        </div>
 
         {/* Lightbox */}
         {isLightboxOpen && (
@@ -259,7 +185,7 @@ export function ResultsGallery() {
             <button
               type="button"
               className="absolute left-4 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-white focus-visible:ring-2 focus-visible:ring-white"
-              onClick={() => setCurrentLightboxIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))}
+              onClick={() => setLightboxIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))}
               aria-label="Gambar sebelumnya"
             >
               <ChevronLeft className="w-6 h-6" aria-hidden="true" />
@@ -276,7 +202,7 @@ export function ResultsGallery() {
             <button
               type="button"
               className="absolute right-4 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-white focus-visible:ring-2 focus-visible:ring-white"
-              onClick={() => setCurrentLightboxIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))}
+              onClick={() => setLightboxIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))}
               aria-label="Gambar selanjutnya"
             >
               <ChevronRight className="w-6 h-6" aria-hidden="true" />
@@ -291,7 +217,7 @@ export function ResultsGallery() {
                   className={`w-2.5 h-2.5 rounded-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
                     index === lightboxIndex ? 'bg-white w-8' : 'bg-white/40 hover:bg-white/60'
                   }`}
-                  onClick={() => setCurrentLightboxIndex(index)}
+                  onClick={() => setLightboxIndex(index)}
                   aria-label={`Ke gambar ${index + 1}`}
                   aria-selected={index === lightboxIndex}
                 />
