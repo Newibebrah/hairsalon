@@ -71,14 +71,18 @@ export function MobileCarousel({
     (touch as any).startY = touch.clientY;
   }, []);
 
-  // Scroll to slide via native scrollTo (smooth)
+  // Scroll to slide via native scrollTo on track (smooth, NO page scroll)
   const scrollToSlide = useCallback((index: number) => {
     const track = trackRef.current;
     if (!track) return;
     const clamped = Math.max(0, Math.min(count - 1, index));
     const slide = track.children[clamped] as HTMLElement;
     if (slide) {
-      slide.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+      // Use track.scrollTo to avoid page scroll - only scrolls the track element
+      track.scrollTo({
+        left: slide.offsetLeft,
+        behavior: 'smooth'
+      });
     }
   }, [count]);
 
