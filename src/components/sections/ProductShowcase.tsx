@@ -25,6 +25,8 @@ export function ProductShowcase() {
           alt=""
           className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
           loading={index < 2 ? 'eager' : 'lazy'}
+          width="800"
+          height="800"
           aria-hidden="true"
         />
         {product.badge && (
@@ -90,6 +92,8 @@ export function ProductShowcase() {
                       alt=""
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       loading="lazy"
+                      width="800"
+                      height="800"
                       aria-hidden="true"
                     />
                     {product.badge && (

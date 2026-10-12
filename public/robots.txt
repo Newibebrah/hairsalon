@@ -1,0 +1,13 @@
+# Hair La Venia Beauty - Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://hairlavenia.com/sitemap.xml
+
+# Disallow private/admin areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /*.json$
+Disallow: /*.xml$

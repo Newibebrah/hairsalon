@@ -32,6 +32,8 @@ export function TeamSection() {
                   alt=""
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   loading="lazy"
+                  width="400"
+                  height="400"
                   aria-hidden="true"
                 />
                 {(member.instagram || member.facebook) && (
