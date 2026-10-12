@@ -2,17 +2,11 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface MobileCarouselProps {
-  /** Jumlah slide */
   count: number;
-  /** ID unik untuk aria-label */
   id: string;
-  /** Label untuk region (aksesibilitas) */
   ariaLabel: string;
-  /** Children: setiap child = 1 slide */
   children: React.ReactNode[];
-  /** Class tambahan untuk container */
   className?: string;
-  /** Callback saat slide berubah */
   onSlideChange?: (index: number) => void;
 }
 
@@ -26,52 +20,41 @@ export function MobileCarousel({
 }: MobileCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const rafRef = useRef<number | null>(null);
 
-  // Sync currentIndex via IntersectionObserver (native, performant)
-  useEffect(() => {
-    if (!trackRef.current) return;
+  // Calculate current slide from scroll position (throttled via rAF)
+  const updateIndexFromScroll = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
 
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-            const slideIndex = Array.from(trackRef.current!.children).indexOf(
-              entry.target as HTMLDivElement
-            );
-            if (slideIndex !== -1 && slideIndex !== currentIndex) {
-              setCurrentIndex(slideIndex);
-              onSlideChange?.(slideIndex);
-            }
-          }
-        });
-      },
-      {
-        root: trackRef.current,
-        threshold: [0.5, 0.75],
-        rootMargin: '0px',
-      }
-    );
+    const scrollLeft = track.scrollLeft;
+    const slideWidth = track.clientWidth;
+    if (slideWidth === 0) return;
 
-    trackRef.current.querySelectorAll('[data-slide-index]').forEach((el) => {
-      observerRef.current?.observe(el);
-    });
+    const newIndex = Math.round(scrollLeft / slideWidth);
+    const clamped = Math.max(0, Math.min(count - 1, newIndex));
 
-    return () => {
-      observerRef.current?.disconnect();
-    };
-  }, [currentIndex, onSlideChange]);
+    if (clamped !== currentIndex) {
+      setCurrentIndex(clamped);
+      onSlideChange?.(clamped);
+    }
+  }, [count, currentIndex, onSlideChange]);
+
+  // Scroll handler with rAF throttling
+  const handleScroll = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(updateIndexFromScroll);
+  }, [updateIndexFromScroll]);
 
   // Scroll to slide via native scrollTo (smooth)
   const scrollToSlide = useCallback((index: number) => {
-    if (!trackRef.current) return;
+    const track = trackRef.current;
+    if (!track) return;
     const clamped = Math.max(0, Math.min(count - 1, index));
-    const slide = trackRef.current.children[clamped] as HTMLElement;
+    const slide = track.children[clamped] as HTMLElement;
     if (slide) {
       slide.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-      setCurrentIndex(clamped);
     }
   }, [count]);
 
@@ -89,6 +72,13 @@ export function MobileCarousel({
     return () => track?.removeEventListener('keydown', handleKeyDown);
   }, [goToPrev, goToNext]);
 
+  // Cleanup rAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
   const canGoPrev = currentIndex > 0;
   const canGoNext = currentIndex < count - 1;
 
@@ -105,11 +95,7 @@ export function MobileCarousel({
         ref={trackRef}
         className="mobile-carousel__track"
         role="list"
-        onScroll={() => {
-          setIsScrolling(true);
-          if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-          scrollTimeoutRef.current = setTimeout(() => setIsScrolling(false), 150);
-        }}
+        onScroll={handleScroll}
       >
         {children.map((child, index) => (
           <div
@@ -167,3 +153,5 @@ export function MobileCarousel({
     </div>
   );
 }
+
+export { ChevronLeft, ChevronRight } from 'lucide-react';
