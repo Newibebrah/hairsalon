@@ -10,7 +10,7 @@ export function HeroSection() {
       style={{ scrollMarginTop: '80px' }}
     >
       <Container>
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center py-10 md:py-16 lg:py-20">
+        <div className="grid lg:grid-cols-2 gap-4 lg:gap-8 items-center py-8 md:py-12 lg:py-16">
           <div className="lg:order-1 relative z-10 animate-slide-up">
             <span className="section-eyebrow inline-block">SALON & HAIR CARE</span>
             <h1

@@ -45,7 +45,7 @@ export function MobileCarousel({
     (touch as any).startY = touch.clientY;
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
     const track = trackRef.current;
     if (!track) return;
     const touch = e.touches[0];
@@ -56,7 +56,7 @@ export function MobileCarousel({
     if (deltaX > deltaY) {
       e.preventDefault();
     }
-  };
+  }, []);
 
   const scrollToSlide = useCallback((index: number) => {
     const track = trackRef.current;
