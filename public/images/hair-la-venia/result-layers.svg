@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" fill="none">
+  <rect width="800" height="1000" fill="#fdeff3"/>
+  <ellipse cx="400" cy="300" rx="200" ry="150" fill="#efbccb" opacity="0.3"/>
+  <ellipse cx="400" cy="700" rx="180" ry="200" fill="#e58ca5" opacity="0.2"/>
+  <text x="400" y="450" text-anchor="middle" font-family="system-ui" font-size="32" fill="#b9637c" opacity="0.4">Layers Hairstyle</text>
+  <text x="400" y="500" text-anchor="middle" font-family="system-ui" font-size="18" fill="#b9637c" opacity="0.3">800x1000 - Replace with actual photograph</text>
+</svg>
