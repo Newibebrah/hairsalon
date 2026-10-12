@@ -27,10 +27,12 @@
     width: max-content;
     flex-wrap: nowrap;
     padding-inline: 0;
+    min-width: 100%;
   }
 
   .mobile-carousel__slide {
     flex: 0 0 100%;
+    width: 100%;
     scroll-snap-align: center;
     scroll-snap-stop: always;
     position: relative;
