@@ -17,7 +17,7 @@ export function MobileCarousel({
   children,
   className = '',
   onSlideChange,
-  autoSlideInterval = 4000,
+  autoSlideInterval = 0, // DISABLED per spec
 }: MobileCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -85,7 +85,7 @@ export function MobileCarousel({
     }
   }, [count]);
 
-  // Auto-slide logic
+  // Auto-slide logic - DISABLED per spec
   useEffect(() => {
     if (autoSlideInterval <= 0) return;
 
@@ -107,8 +107,9 @@ export function MobileCarousel({
 
   return (
     <div
-      className={`mobile-carousel ${className}`}
+      className={`gallery ${className}`}
       id={id}
+      data-gallery
       role="region"
       aria-label={ariaLabel}
       aria-roledescription="carousel"
@@ -119,7 +120,8 @@ export function MobileCarousel({
       {/* Track - Native Scroll Snap */}
       <div
         ref={trackRef}
-        className="mobile-carousel__track"
+        className="gallery__track"
+        data-gallery-track
         role="list"
         onScroll={handleScroll}
         onTouchStart={handleTouchStart}
@@ -129,10 +131,11 @@ export function MobileCarousel({
         {children.map((child, index) => (
           <div
             key={index}
-            className="mobile-carousel__slide"
+            className="gallery__slide"
             role="listitem"
             aria-roledescription="slide"
             aria-label={`${index + 1} dari ${count}`}
+            data-gallery-slide
             data-slide-index={index}
           >
             {child}
@@ -141,13 +144,13 @@ export function MobileCarousel({
       </div>
 
       {/* Dot Indicators */}
-      <div className="mobile-carousel__dots" role="tablist" aria-label="Indikator slide">
+      <div className="gallery__dots" data-gallery-dots role="tablist" aria-label="Navigasi galeri">
         {Array.from({ length: count }, (_, i) => (
           <button
             key={i}
             type="button"
             role="tab"
-            className="mobile-carousel__dot"
+            className="gallery__dot"
             onClick={() => scrollToSlide(i)}
             onPointerDown={handleInteractionStart}
             onPointerUp={handleInteractionEnd}

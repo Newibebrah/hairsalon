@@ -1,14 +1,14 @@
-/* Mobile Carousel - Native Scroll Snap */
+/* Mobile Gallery - Native Scroll Snap */
 @layer components {
-  .mobile-carousel {
-    --slide-ratio: 4 / 3;
+  .gallery {
+    --slide-ratio: 4 / 5;
     --slide-gap: 0;
     --scrollbar-w: 0;
 
     position: relative;
     width: 100%;
     overflow-x: auto;
-    overflow-y: hidden; /* Lock vertical scroll */
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     scroll-snap-stop: always;
     scroll-behavior: smooth;
@@ -16,97 +16,91 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    touch-action: pan-x; /* Only horizontal pan */
-    overscroll-behavior-x: contain; /* Prevent scroll chaining to parent */
-    overscroll-behavior-y: none; /* Prevent vertical scroll chaining */
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: none;
+    box-sizing: border-box;
   }
 
-  .mobile-carousel::-webkit-scrollbar {
+  .gallery::-webkit-scrollbar {
     display: none;
   }
 
-  .mobile-carousel__track {
+  .gallery__track {
     display: flex;
     gap: var(--slide-gap);
     width: max-content;
     flex-wrap: nowrap;
-    padding-inline: 0;
+    padding: 0;
+    margin: 0;
     min-width: 100%;
   }
 
-  .mobile-carousel__slide {
+  .gallery__slide {
     flex: 0 0 100%;
     width: 100%;
     scroll-snap-align: center;
     scroll-snap-stop: always;
-    position: relative;
     aspect-ratio: var(--slide-ratio);
+    max-height: 60svh;
     min-width: 0;
   }
 
-  .mobile-carousel__slide > * {
+  .gallery__slide > * {
     width: 100%;
     height: 100%;
     display: block;
   }
 
-  .mobile-carousel__slide img {
+  .gallery__slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center;
+    display: block;
   }
 
   /* Dot Indicators */
-  .mobile-carousel__dots {
+  .gallery__dots {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
-    padding: 16px 8px 8px;
-    margin: 0 auto;
-    max-width: 100%;
+    margin-top: 12px;
+    padding: 0;
   }
 
-  .mobile-carousel__dot {
+  .gallery__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--color-pink-300, #efbccb);
-    border: none;
+    background: currentColor;
+    opacity: 0.35;
+    border: 0;
+    padding: 0;
     cursor: pointer;
-    padding: 12px; /* 32px touch target */
-    opacity: 0.5;
-    transition: background 0.2s ease, width 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 200ms ease;
+    position: relative;
   }
 
-  .mobile-carousel__dot:hover {
-    opacity: 0.8;
+  .gallery__dot::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
   }
 
-  .mobile-carousel__dot:focus-visible {
-    outline: 2px solid var(--color-brand, #df5475);
-    outline-offset: 3px;
-  }
-
-  .mobile-carousel__dot[aria-selected="true"] {
-    background: var(--color-brand, #df5475);
-    width: 24px;
-    border-radius: 999px;
+  .gallery__dot[aria-selected="true"] {
     opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .mobile-carousel {
-      scroll-behavior: auto;
-    }
-    .mobile-carousel__dot {
-      transition: none;
-    }
+    .gallery__track { scroll-behavior: auto; }
+    .gallery__dot { transition: none; }
   }
 
   /* Hide on desktop */
   @media (min-width: 768px) {
-    .mobile-carousel { display: none; }
+    .gallery { display: none; }
   }
 }
