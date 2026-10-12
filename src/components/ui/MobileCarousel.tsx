@@ -22,20 +22,6 @@ export function MobileCarousel({
   const trackRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Calculate current slide from scroll position
-  const updateIndexFromScroll = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const slideWidth = track.clientWidth;
-    if (slideWidth === 0) return;
-    const newIndex = Math.round(track.scrollLeft / track.clientWidth);
-    const clamped = Math.max(0, Math.min(count - 1, newIndex));
-    if (clamped !== currentIndex) {
-      setCurrentIndex(clamped);
-    }
-  }, [count, currentIndex]);
-
-  // Throttled scroll handler
   const handleScroll = useCallback(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -48,22 +34,23 @@ export function MobileCarousel({
     }
   }, [count, currentIndex]);
 
-  // Prevent vertical scroll during horizontal swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    (touch as any).startX = touch.clientX;
+    (touch as any).startY = touch.clientY;
+  };
+
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     const track = trackRef.current;
     if (!track) return;
     const touch = e.touches[0];
-    const deltaX = Math.abs(touch.clientX - (touch as any).startX || touch.clientX);
-    const deltaY = Math.abs(touch.clientY - (touch as any).startY || touch.clientY);
+    const startX = (touch as { startX?: number }).startX ?? touch.clientX;
+    const startY = (touch as { startY?: number }).startY ?? touch.clientY;
+    const deltaX = Math.abs(touch.clientX - startX);
+    const deltaY = Math.abs(touch.clientY - startY);
     if (deltaX > deltaY) {
       e.preventDefault();
     }
-  }, []);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    (touch as any).startX = touch.clientX;
-    (touch as any).startY = touch.clientY;
   }, []);
 
   const scrollToSlide = useCallback((index: number) => {
@@ -85,7 +72,7 @@ export function MobileCarousel({
       aria-label={ariaLabel}
       aria-roledescription="carousel"
     >
-      {/* Track - Native Scroll Snap */}
+      {/* Swipe Area - Images Only */}
       <div
         ref={trackRef}
         className="gallery__track"
@@ -138,7 +125,7 @@ export function MobileCarousel({
         ))}
       </div>
 
-      {/* Dot Indicators */}
+      {/* Dot Indicators - BELOW the swipe area, separate */}
       <div className="gallery__dots" data-gallery-dots role="tablist" aria-label="Navigasi galeri">
         {Array.from({ length: count }, (_, i) => (
           <button
