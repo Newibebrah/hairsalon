@@ -17,6 +17,8 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     touch-action: pan-x; /* Only horizontal pan */
+    overscroll-behavior-x: contain; /* Prevent scroll chaining to parent */
+    overscroll-behavior-y: none; /* Prevent vertical scroll chaining */
   }
 
   .mobile-carousel::-webkit-scrollbar {

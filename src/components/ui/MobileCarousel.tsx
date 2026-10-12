@@ -49,6 +49,28 @@ export function MobileCarousel({
     rafRef.current = requestAnimationFrame(updateIndexFromScroll);
   }, [updateIndexFromScroll]);
 
+  // Prevent vertical scroll during horizontal swipe
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const track = trackRef.current;
+    if (!track) return;
+    
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - (touch as any).startX || touch.clientX);
+    const deltaY = Math.abs(touch.clientY - (touch as any).startY || touch.clientY);
+    
+    // If horizontal movement is greater than vertical, prevent vertical scroll
+    if (deltaX > deltaY) {
+      e.preventDefault();
+    }
+  }, []);
+
+  // Track touch start for delta calculation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    (touch as any).startX = touch.clientX;
+    (touch as any).startY = touch.clientY;
+  }, []);
+
   // Scroll to slide via native scrollTo (smooth)
   const scrollToSlide = useCallback((index: number) => {
     const track = trackRef.current;
@@ -103,6 +125,9 @@ export function MobileCarousel({
         className="mobile-carousel__track"
         role="list"
         onScroll={handleScroll}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchStartCapture={handleTouchStart}
       >
         {children.map((child, index) => (
           <div
