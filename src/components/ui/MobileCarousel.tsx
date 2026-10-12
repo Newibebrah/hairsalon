@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface MobileCarouselProps {
   count: number;
@@ -8,6 +7,7 @@ export interface MobileCarouselProps {
   children: React.ReactNode[];
   className?: string;
   onSlideChange?: (index: number) => void;
+  autoSlideInterval?: number; // ms, default 4000, 0 = disabled
 }
 
 export function MobileCarousel({
@@ -17,13 +17,15 @@ export function MobileCarousel({
   children,
   className = '',
   onSlideChange,
+  autoSlideInterval = 4000,
 }: MobileCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rafRef = useRef<number | null>(null);
+  const autoSlideRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isUserInteractingRef = useRef(false);
 
-  // Calculate current slide from scroll position (throttled via rAF)
+  // Calculate current slide from scroll position
   const updateIndexFromScroll = useCallback(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -41,7 +43,7 @@ export function MobileCarousel({
     }
   }, [count, currentIndex, onSlideChange]);
 
-  // Scroll handler with rAF throttling
+  // Throttled scroll handler
   const handleScroll = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(updateIndexFromScroll);
@@ -61,23 +63,25 @@ export function MobileCarousel({
   const goToPrev = useCallback(() => scrollToSlide(currentIndex - 1), [currentIndex, scrollToSlide]);
   const goToNext = useCallback(() => scrollToSlide(currentIndex + 1), [currentIndex, scrollToSlide]);
 
-  // Keyboard navigation
+  // Auto-slide logic
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goToPrev();
-      else if (e.key === 'ArrowRight') goToNext();
-    };
-    const track = trackRef.current;
-    track?.addEventListener('keydown', handleKeyDown);
-    return () => track?.removeEventListener('keydown', handleKeyDown);
-  }, [goToPrev, goToNext]);
+    if (autoSlideInterval <= 0) return;
 
-  // Cleanup rAF on unmount
-  useEffect(() => {
+    autoSlideRef.current = setInterval(() => {
+      if (isUserInteractingRef.current) return;
+      
+      const nextIndex = currentIndex >= count - 1 ? 0 : currentIndex + 1;
+      scrollToSlide(nextIndex);
+    }, autoSlideInterval);
+
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (autoSlideRef.current) clearInterval(autoSlideRef.current);
     };
-  }, []);
+  }, [currentIndex, count, autoSlideInterval, scrollToSlide]);
+
+  // Pause auto-slide on user interaction
+  const handleInteractionStart = () => { isUserInteractingRef.current = true; };
+  const handleInteractionEnd = () => { isUserInteractingRef.current = false; };
 
   const canGoPrev = currentIndex > 0;
   const canGoNext = currentIndex < count - 1;
@@ -89,6 +93,9 @@ export function MobileCarousel({
       role="region"
       aria-label={ariaLabel}
       aria-roledescription="carousel"
+      onPointerDown={handleInteractionStart}
+      onPointerUp={handleInteractionEnd}
+      onPointerLeave={handleInteractionEnd}
     >
       {/* Track - Native Scroll Snap */}
       <div
@@ -111,30 +118,6 @@ export function MobileCarousel({
         ))}
       </div>
 
-      {/* Prev Button */}
-      <button
-        type="button"
-        className="mobile-carousel__btn mobile-carousel__btn--prev"
-        onClick={goToPrev}
-        disabled={!canGoPrev}
-        aria-label="Slide sebelumnya"
-        aria-disabled={!canGoPrev}
-      >
-        <ChevronLeft className="w-5 h-5" aria-hidden="true" />
-      </button>
-
-      {/* Next Button */}
-      <button
-        type="button"
-        className="mobile-carousel__btn mobile-carousel__btn--next"
-        onClick={goToNext}
-        disabled={!canGoNext}
-        aria-label="Slide selanjutnya"
-        aria-disabled={!canGoNext}
-      >
-        <ChevronRight className="w-5 h-5" aria-hidden="true" />
-      </button>
-
       {/* Dot Indicators */}
       <div className="mobile-carousel__dots" role="tablist" aria-label="Indikator slide">
         {Array.from({ length: count }, (_, i) => (
@@ -144,6 +127,8 @@ export function MobileCarousel({
             role="tab"
             className="mobile-carousel__dot"
             onClick={() => scrollToSlide(i)}
+            onPointerDown={handleInteractionStart}
+            onPointerUp={handleInteractionEnd}
             aria-label={`Ke slide ${i + 1}`}
             aria-selected={i === currentIndex}
             aria-controls={`${id}-slide-${i}`}
@@ -153,5 +138,3 @@ export function MobileCarousel({
     </div>
   );
 }
-
-export { ChevronLeft, ChevronRight } from 'lucide-react';
