@@ -69,19 +69,15 @@
   }
 
   .mobile-carousel__dot {
-    position: relative;
     width: 8px;
     height: 8px;
-    min-width: 8px;
-    min-height: 8px;
     border-radius: 50%;
     background: var(--color-pink-300, #efbccb);
     border: none;
     cursor: pointer;
     padding: 12px; /* 32px touch target */
     opacity: 0.5;
-    transition: background 0.2s ease, width 0.2s ease, opacity 0.2s ease;
-    background-clip: content-box;
+    transition: background 0.2s ease, width 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   }
 
   .mobile-carousel__dot:hover {
