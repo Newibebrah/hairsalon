@@ -1,9 +1,8 @@
-/* Mobile Gallery - Native Scroll Snap */
+/* Slider - Native Scroll Snap */
 @layer components {
-  .gallery {
-    --slide-ratio: 3 / 4;
+  .slider {
+    --slide-ratio: 4 / 5;
     --slide-gap: 12px;
-    --scrollbar-w: 0;
 
     position: relative;
     width: 100%;
@@ -23,11 +22,11 @@
     padding: 0 16px;
   }
 
-  .gallery::-webkit-scrollbar {
+  .slider::-webkit-scrollbar {
     display: none;
   }
 
-  .gallery__track {
+  .slider__track {
     display: flex;
     gap: var(--slide-gap);
     width: max-content;
@@ -37,33 +36,51 @@
     min-width: 100%;
   }
 
-  .gallery__slide {
-    flex: 0 0 calc(100% - 32px);
-    width: calc(100% - 32px);
+  .slider__card {
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 0;
     scroll-snap-align: center;
     scroll-snap-stop: always;
     aspect-ratio: var(--slide-ratio);
     max-height: 50svh;
-    min-width: 0;
-    margin: 0 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
-  .gallery__slide > * {
+  .slider__card > * {
     width: 100%;
     height: 100%;
     display: block;
   }
 
-  .gallery__slide img {
+  .slider__card img {
     width: 100%;
-    height: 100%;
+    height: auto;
+    aspect-ratio: var(--slide-ratio);
     object-fit: cover;
     object-position: center;
     display: block;
   }
 
+  .slider__card h1,
+  .slider__card h2,
+  .slider__card h3,
+  .slider__card h4,
+  .slider__card p,
+  .slider__card span,
+  .slider__card a {
+    margin: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
+  }
+
   /* Dot Indicators */
-  .gallery__dots {
+  .slider__dots {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -73,7 +90,7 @@
     padding: 0;
   }
 
-  .gallery__dot {
+  .slider__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -86,23 +103,28 @@
     position: relative;
   }
 
-  .gallery__dot::after {
+  .slider__dot::after {
     content: "";
     position: absolute;
     inset: -12px;
   }
 
-  .gallery__dot[aria-selected="true"] {
+  .slider__dot[aria-selected="true"] {
     opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .gallery__track { scroll-behavior: auto; }
-    .gallery__dot { transition: none; }
+    .slider__track { scroll-behavior: auto; }
+    .slider__dot { transition: none; }
   }
 
   /* Hide on desktop */
   @media (min-width: 768px) {
-    .gallery { display: none; }
+    .slider { display: none; }
+  }
+
+  /* Mobile padding adjustments */
+  @media (min-width: 414px) {
+    .slider { padding: 0 20px; }
   }
 }

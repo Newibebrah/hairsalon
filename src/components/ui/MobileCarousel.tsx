@@ -7,7 +7,6 @@ export interface MobileCarouselProps {
   children: React.ReactNode[];
   className?: string;
   onSlideChange?: (index: number) => void;
-  autoSlideInterval?: number;
 }
 
 export function MobileCarousel({
@@ -17,22 +16,28 @@ export function MobileCarousel({
   children,
   className = '',
   onSlideChange,
-  autoSlideInterval = 0,
 }: MobileCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handleScroll = useCallback(() => {
+  const updateActiveDot = useCallback(() => {
     const track = trackRef.current;
     if (!track) return;
     const slideWidth = track.clientWidth;
-    if (slideWidth === 0) return;
-    const newIndex = Math.round(track.scrollLeft / track.clientWidth);
-    const clamped = Math.max(0, Math.min(count - 1, newIndex));
-    if (clamped !== currentIndex) {
-      setCurrentIndex(clamped);
+    const gap = parseFloat(getComputedStyle(track).gap) || 0;
+    const step = slideWidth + gap;
+    if (step === 0) return;
+    const index = Math.round(track.scrollLeft / step);
+    const safeIndex = Math.max(0, Math.min(index, count - 1));
+    if (safeIndex !== currentIndex) {
+      setCurrentIndex(safeIndex);
+      onSlideChange?.(safeIndex);
     }
-  }, [count, currentIndex]);
+  }, [count, currentIndex, onSlideChange]);
+
+  const handleScroll = useCallback(() => {
+    updateActiveDot();
+  }, [updateActiveDot]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
@@ -40,18 +45,18 @@ export function MobileCarousel({
     (touch as any).startY = touch.clientY;
   };
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+  const handleTouchMove = (e: React.TouchEvent) => {
     const track = trackRef.current;
     if (!track) return;
     const touch = e.touches[0];
-    const startX = (touch as { startX?: number }).startX ?? touch.clientX;
-    const startY = (touch as { startY?: number }).startY ?? touch.clientY;
+    const startX = (touch as any).startX ?? touch.clientX;
+    const startY = (touch as any).startY ?? touch.clientY;
     const deltaX = Math.abs(touch.clientX - startX);
     const deltaY = Math.abs(touch.clientY - startY);
     if (deltaX > deltaY) {
       e.preventDefault();
     }
-  }, []);
+  };
 
   const scrollToSlide = useCallback((index: number) => {
     const track = trackRef.current;
@@ -63,30 +68,61 @@ export function MobileCarousel({
     }
   }, [count]);
 
+  // Initialize dots on mount
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    updateActiveDot();
+  }, [updateActiveDot]);
+
+  // Scroll listener
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    track.addEventListener('scroll', handleScroll, { passive: true });
+    return () => track.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  // Resize listener
+  useEffect(() => {
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    const handleResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updateActiveDot, 100);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (resizeTimer) clearTimeout(resizeTimer);
+    };
+  }, [updateActiveDot]);
+
   return (
     <div
-      className={`gallery ${className}`}
+      className={`slider ${className}`}
       id={id}
-      data-gallery
+      data-slider
       role="region"
       aria-label={ariaLabel}
       aria-roledescription="carousel"
     >
-      {/* Swipe Area - Images Only */}
+      {/* Track - Swipe Area */}
       <div
         ref={trackRef}
-        className="gallery__track"
-        data-gallery-track
+        className="slider__track"
+        data-slider-track
         role="list"
-        onScroll={() => {
-          const track = trackRef.current;
-          if (!track) return;
+        onScroll={(e) => {
+          const track = e.currentTarget;
           const slideWidth = track.clientWidth;
-          if (slideWidth === 0) return;
-          const newIndex = Math.round(track.scrollLeft / track.clientWidth);
-          const clamped = Math.max(0, Math.min(count - 1, newIndex));
-          if (clamped !== currentIndex) {
-            setCurrentIndex(clamped);
+          const gap = parseFloat(getComputedStyle(track).gap) || 0;
+          const step = slideWidth + gap;
+          if (step === 0) return;
+          const index = Math.round(track.scrollLeft / step);
+          const safeIndex = Math.max(0, Math.min(index, count - 1));
+          if (safeIndex !== currentIndex) {
+            setCurrentIndex(safeIndex);
+            onSlideChange?.(safeIndex);
           }
         }}
         onTouchStart={(e: React.TouchEvent) => {
@@ -98,8 +134,10 @@ export function MobileCarousel({
           const track = trackRef.current;
           if (!track) return;
           const touch = e.touches[0];
-          const deltaX = Math.abs(touch.clientX - (touch as any).startX || touch.clientX);
-          const deltaY = Math.abs(touch.clientY - (touch as any).startY || touch.clientY);
+          const startX = (touch as any).startX ?? touch.clientX;
+          const startY = (touch as any).startY ?? touch.clientY;
+          const deltaX = Math.abs(touch.clientX - startX);
+          const deltaY = Math.abs(touch.clientY - startY);
           if (deltaX > deltaY) {
             e.preventDefault();
           }
@@ -113,11 +151,11 @@ export function MobileCarousel({
         {children.map((child, index) => (
           <div
             key={index}
-            className="gallery__slide"
+            className="slider__card"
             role="listitem"
             aria-roledescription="slide"
             aria-label={`${index + 1} dari ${count}`}
-            data-gallery-slide
+            data-slider-card
             data-slide-index={index}
           >
             {child}
@@ -125,14 +163,14 @@ export function MobileCarousel({
         ))}
       </div>
 
-      {/* Dot Indicators - BELOW the swipe area, separate */}
-      <div className="gallery__dots" data-gallery-dots role="tablist" aria-label="Navigasi galeri">
+      {/* Dot Indicators */}
+      <div className="slider__dots" data-slider-dots role="tablist" aria-label="Navigasi slider">
         {Array.from({ length: count }, (_, i) => (
           <button
             key={i}
             type="button"
             role="tab"
-            className="gallery__dot"
+            className="slider__dot"
             onClick={() => {
               const track = trackRef.current;
               if (!track) return;
@@ -142,7 +180,7 @@ export function MobileCarousel({
                 track.scrollTo({ left: slide.offsetLeft, behavior: 'smooth' });
               }
             }}
-            aria-label={`Ke gambar ${i + 1}`}
+            aria-label={`Ke item ${i + 1}`}
             aria-selected={i === currentIndex}
             aria-controls={`${id}-slide-${i}`}
           />

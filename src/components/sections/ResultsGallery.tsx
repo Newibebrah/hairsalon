@@ -81,27 +81,33 @@ export function ResultsGallery() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isLightboxOpen, closeLightbox, goToPrev, goToNext]);
 
-  // Build slide components for carousel
+  // Build slide components for carousel - simplified to work with slider__card
   const slides = galleryImages.map((image, index) => (
-    <button
+    <div
       key={image.id}
-      type="button"
-      className="w-full h-full aspect-[4/3] rounded-2xl overflow-hidden bg-pink-50 focus-visible:ring-4 focus-visible:ring-brand focus-visible:ring-offset-2"
-      onClick={() => openLightbox(index)}
-      aria-label={`Lihat ${image.category} - ${image.alt}`}
+      className="slider__card"
+      data-slider-card
+      data-slide-index={index}
     >
-      <img
-        src={image.src}
-        alt=""
-        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-        loading={index < 2 ? 'eager' : 'lazy'}
-        aria-hidden="true"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-heading/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
-      <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 hover:opacity-100 transition-all duration-300 translate-y-2 hover:translate-y-0">
-        <p className="font-heading text-lg font-medium">{image.category}</p>
-      </div>
-    </button>
+      <button
+        type="button"
+        className="w-full h-full focus-visible:ring-4 focus-visible:ring-brand focus-visible:ring-offset-2"
+        onClick={() => openLightbox(index)}
+        aria-label={`Lihat ${image.category} - ${image.alt}`}
+      >
+        <img
+          src={image.src}
+          alt=""
+          className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+          loading={index < 2 ? 'eager' : 'lazy'}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-heading/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
+        <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 hover:opacity-100 transition-all duration-300 translate-y-2 hover:translate-y-0">
+          <p className="font-heading text-lg font-medium">{image.category}</p>
+        </div>
+      </button>
+    </div>
   ));
 
   return (
@@ -129,7 +135,6 @@ export function ResultsGallery() {
           id="gallery-carousel"
           ariaLabel="Galeri hasil kerja salon"
           count={galleryImages.length}
-          autoSlideInterval={4000}
         >
           {slides}
         </MobileCarousel>

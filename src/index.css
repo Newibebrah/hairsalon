@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+@import './styles/mobile-carousel.css';
 
 @theme {
   /* Brand Colors - WCAG AA compliant */
@@ -97,6 +98,10 @@
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: 80px;
+  }
+
+  body {
+    overflow-x: hidden;
   }
 
   @media (prefers-reduced-motion: reduce) {
