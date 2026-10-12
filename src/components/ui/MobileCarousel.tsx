@@ -149,20 +149,23 @@ export function MobileCarousel({
 
       {/* Dot Indicators */}
       <div className="mobile-carousel__dots" role="tablist" aria-label="Indikator slide">
-        {Array.from({ length: count }, (_, i) => (
-          <button
-            key={i}
-            type="button"
-            role="tab"
-            className="mobile-carousel__dot"
-            onClick={() => scrollToSlide(i)}
-            onPointerDown={handleInteractionStart}
-            onPointerUp={handleInteractionEnd}
-            aria-label={`Ke slide ${i + 1}`}
-            aria-selected={i === currentIndex}
-            aria-controls={`${id}-slide-${i}`}
-          />
-        ))}
+        {Array.from({ length: count - 1 }, (_, i) => {
+          const dotIndex = i + 1; // Skip first dot (index 0)
+          return (
+            <button
+              key={dotIndex}
+              type="button"
+              role="tab"
+              className="mobile-carousel__dot"
+              onClick={() => scrollToSlide(dotIndex)}
+              onPointerDown={handleInteractionStart}
+              onPointerUp={handleInteractionEnd}
+              aria-label={`Ke slide ${dotIndex + 1}`}
+              aria-selected={dotIndex === currentIndex}
+              aria-controls={`${id}-slide-${dotIndex}`}
+            />
+          );
+        })}
       </div>
     </div>
   );

@@ -97,7 +97,6 @@ export function Navbar() {
 
   const handleLinkClick = (href: string) => {
     if (href.startsWith('#')) {
-      closeMenu();
       const element = document.querySelector(href);
       if (element) element.scrollIntoView({ behavior: 'smooth' });
     }
@@ -125,17 +124,20 @@ export function Navbar() {
                 href={link.href}
                 role="menuitem"
                 className={cn(
-                  'block w-full py-4 px-4 text-lg font-medium text-heading rounded-xl transition-all duration-200 text-left',
-                  'hover:bg-pink-50 hover:text-brand',
-                  activeSection === link.href.replace('#', '') ? 'bg-pink-50 text-brand' : '',
+                  'block w-full py-4 px-4 text-lg font-medium text-brand rounded-xl transition-all duration-200 text-left',
+                  'hover:bg-pink-50 hover:text-brand-hover',
+                  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2',
+                  'border-l-4 border-transparent hover:border-brand hover:bg-pink-50',
+                  activeSection === link.href.replace('#', '') ? 'bg-pink-50 text-brand-hover border-brand' : '',
                   link.scroll ? 'cursor-pointer' : ''
                 )}
                 onClick={(e) => {
                   if (link.scroll) {
                     e.preventDefault();
                     handleLinkClick(link.href);
+                    // Delay close to allow scroll to start
+                    setTimeout(closeMenu, 100);
                   }
-                  closeMenu();
                 }}
                 style={{ transitionDelay: `${index * 50}ms` }}
                 aria-current={activeSection === link.href.replace('#', '') ? 'page' : undefined}
@@ -210,10 +212,12 @@ export function Navbar() {
                       href={link.href}
                       role="menuitem"
                       className={cn(
-                        'relative transition-colors duration-200',
+                        'relative transition-all duration-200',
                         'after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:w-0 after:bg-brand after:transition-all after:duration-300',
                         'hover:text-brand hover:after:w-full',
-                        activeSection === link.href.replace('#', '') ? 'text-brand' : '',
+                        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2',
+                        'py-2 px-1 border-b-2 border-transparent hover:border-brand hover:bg-pink-50',
+                        activeSection === link.href.replace('#', '') ? 'text-brand border-brand' : '',
                         link.scroll ? 'cursor-pointer' : ''
                       )}
                       onClick={(e) => {
