@@ -131,9 +131,9 @@
     .slider__dot { transition: none; }
   }
 
-  /* Hide on desktop */
+  /* Hide on desktop - force hide with !important */
   @media (min-width: 768px) {
-    .slider { display: none; }
+    .slider { display: none !important; }
   }
 
   /* Mobile padding adjustments */
@@ -146,4 +146,28 @@
   @media (min-width: 414px) {
     .slider { padding: 0 16px; }
   }
+}
+
+/* Desktop grid - ensure proper hiding on mobile */
+@media (max-width: 767px) {
+  .md\:grid { display: none !important; }
+  .md\:flex { display: none !important; }
+  .hidden { display: none !important; }
+}
+
+/* Ensure slider is visible on mobile */
+@media (max-width: 767px) {
+  .slider { display: block !important; }
+}
+
+/* Ensure desktop grid is visible on desktop */
+@media (min-width: 768px) {
+  .md\:grid { display: grid !important; }
+  .md\:flex { display: flex !important; }
+}
+
+/* Desktop grid - ensure proper hiding on mobile */
+@media (max-width: 767px) {
+  .md\:grid { display: none !important; }
+  .md\:flex { display: none !important; }
 }
