@@ -165,9 +165,3 @@
   .md\:grid { display: grid !important; }
   .md\:flex { display: flex !important; }
 }
-
-/* Desktop grid - ensure proper hiding on mobile */
-@media (max-width: 767px) {
-  .md\:grid { display: none !important; }
-  .md\:flex { display: none !important; }
-}
