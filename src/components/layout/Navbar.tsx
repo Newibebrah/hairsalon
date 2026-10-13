@@ -207,9 +207,6 @@ export function Navbar() {
       )}
       role="banner"
     >
-      <a href="#main" className="skip-link">
-        Lewati ke konten utama
-      </a>
       <nav className="relative" aria-label="Navigasi utama">
         <Container>
           <div className="flex items-center justify-between h-16 md:h-[72px]">
